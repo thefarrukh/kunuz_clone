@@ -1,2 +1,2 @@
 # kunuz_clone
-first project
+B4 final exam
