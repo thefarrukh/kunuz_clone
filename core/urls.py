@@ -39,6 +39,8 @@ urlpatterns = [
     path('password-reset/delete/', PasswordResetRequestAPIView.as_view(), name='passwordreset-delete'),
     path('password-reset/update/', PasswordResetConfirmAPIView.as_view(), name='passwordreset-update'),
 
+    path('rosetta/', include('rosetta.urls')),
+
     # Swagger va Redoc
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
