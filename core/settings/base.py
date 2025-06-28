@@ -25,8 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#tw&z#^5iib6&7ihl1^5rsfr+x^7k!f*!7t7@32!qezbnn$-s9'
-
+SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -64,6 +63,7 @@ EXTERNAL_APPS = [
     "rosetta",
     "modeltranslation",
     "django_celery_beat",
+    'drf_spectacular',
 ]
 
 
@@ -133,6 +133,55 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# REST Framework Settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # 5 minutes
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # 1 day
+}
+
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT Authorization header. Example: Bearer <your_token>',
+        },
+    },
+    'USE_SESSION_AUTH': False,
+    # 'PERSIST_AUTH': True
+}
+
+
+# Password validation
+# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -162,3 +211,174 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Email Settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+TOKEN_EXPIRY_SECONDS = 3600  # 1 hour
+
+
+# JAZZMIN settings
+
+JAZZMIN_SETTINGS = {
+    "site_title": "VooCommerce Admin",
+    "site_header": "VooCommerce",
+    "site_logo": "apple.jpg",
+    "login_logo": "apple.jpg",
+    "site_logo_classes": "img-circle",
+    "site_icon": "apple.jpg",
+    "welcome_sign": "Welcome to the VooCommerce Admin",
+    "copyright": "UIC Academy",
+    "search_model": ["auth.User", "auth.Group"],
+    "user_avatar": "avatar",
+
+    ############
+    # Top Menu #
+    ############
+
+    "topmenu_links": [
+        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+        {"app": "accounts"},
+    ],
+
+    #############
+    # Side Menu #
+    #############
+
+    "show_sidebar": True,
+    "navigation_expanded": False,
+    "hide_apps": [],
+    "hide_models": [],
+    "custom_links": {
+        "books": [{
+            "name": "Make Messages", 
+            "url": "make_messages", 
+            "icon": "fas fa-comments",
+            "permissions": ["books.view_book"]
+        }]
+    },
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+
+    #################
+    # Related Modal #
+    #################
+    "related_modal_active": False,
+
+    #############
+    # UI Tweaks #
+    #############
+    "custom_css": None,
+    "custom_js": None,
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": True,
+
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
+    "language_chooser": True,
+}
+
+# Crispy Forms
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+CRISPY_TEMPLATE_PACK = "bootstrap4"
+
+# Logging Config
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    # Define formatters for log message appearance
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",  # Use string formatting style
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    # Define handlers to specify where logs go
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",  # Outputs to console
+            "level": "DEBUG",  # Capture all levels
+            "formatter": "simple",  # Use simple format for console
+        },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",  # Rotates log files to manage size
+            "level": "DEBUG",  # Capture all levels
+            "formatter": "verbose",  # Use verbose format for files
+            "filename": os.path.join(BASE_DIR, "logs", "debug.log"),  # Log file path
+            "maxBytes": 1024 * 1024 * 5,  # 5 MB per file
+            "backupCount": 5,  # Keep 5 backup files
+        },
+    },
+    # Define loggers for your apps and Django
+    "loggers": {
+        # Root logger (captures all logs not handled by other loggers)
+        "": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",  # Reduce noise from Django internals
+            "propagate": False,
+        },
+    },
+}
+
+
+# I18n
+
+from django.utils.translation import gettext_lazy as _
+
+LANGUAGES = [
+    ("uz", _("Uzbek")),
+    ("en", _("English")),
+    ("ru", _("Russian"))
+]
+
+# LANGUAGE_CODE = 'en'
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
+
+MODELTRANSLATION_LANGUAGES = ('uz', 'en', 'ru')
+
+MODELTRANSLATION_FALLBACK_LANGUAGES = {
+    'default': ('en',),
+    'uz': ('en',),
+    'ru': ('en',),
+}
+
+# CELERY settings
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'KUN.UZ Clone API',
+    'DESCRIPTION': 'Yangiliklar, foydalanuvchilar va kommentlar API',
+    'VERSION': '1.0.0',
+}
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
